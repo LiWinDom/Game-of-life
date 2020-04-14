@@ -1,12 +1,12 @@
-﻿//Version 3.2:219
+﻿//Version 3.2:221
 #include <iostream>
 #include <algorithm>
 #include <vector>
 #include <SFML/Graphics.hpp>
 
 //game options
-const uint8_t startSpeed = 10; //start game speed, gens per second
-const uint8_t speedStep = 5; //increase of game speed
+const uint8_t startSpeed = 100; //start game speed, gens per second
+const uint8_t speedStep = 50; //increase of game speed
 const bool isLoopCheck = true; //if true, game will check for end (slower)
 const bool newGameMode = false; //if true, each cell have only 4 neighbours (up, down, left and right)
 
@@ -27,7 +27,7 @@ const uint64_t fieldBorderColor = 0x000000FF; //color of field border in HEX for
 const uint8_t borderThinkness = 2; //border thinkness, set to 0, if you don't want to see borders
 
 void manual() {
-    std::cout << "Game of life - version 3.1:219\n";
+    std::cout << "Game of life - version 3.1:221\n";
     std::cout << "To pause - press 'P', Space or Enter\n";
     std::cout << "To see previous or next gen - press arror left or arror right\n";
     std::cout << "To increase game speed - press '+' or arror up\n";
@@ -374,7 +374,7 @@ int main() {
     field.assign(1, std::vector<std::vector<bool>>(height, std::vector<bool>(whith)));
     manual();
 
-    sf::RenderWindow gameWindow(sf::VideoMode((whith * size) + (whith + 1) * borderThinkness, (height * size) + (height + 1) * borderThinkness + (size * 5.75)), "Game of life - version 3.2:219", sf::Style::Close);
+    sf::RenderWindow gameWindow(sf::VideoMode((whith * size) + (whith + 1) * borderThinkness, (height * size) + (height + 1) * borderThinkness + (size * 4.75)), "Game of life - version 3.2:221", sf::Style::Close);
     sf::Image icon;
     icon.loadFromFile("../resourses/grafics/icon.png");
     gameWindow.setIcon(48, 48, icon.getPixelsPtr());
@@ -410,7 +410,7 @@ int main() {
         showGen(gameWindow, field, curGen);
         showText(gameWindow, field, curGen, repeatGen, isRepeat, speed, state, alive);
         gameWindow.display();
-        if (isRunning && speed != 0) sf::sleep(sf::milliseconds(1000 / speed));
+        if (isRunning && speed != 0) sf::sleep(sf::milliseconds(1000 / (speed / 10)));
     }
     std::cout << "Goodbye!";
     return 0;
