@@ -1,12 +1,12 @@
-﻿//Version 3.2:219
+﻿//Version 3.3:250
 #include <iostream>
 #include <algorithm>
 #include <vector>
 #include <SFML/Graphics.hpp>
 
 //game options
-const uint8_t startSpeed = 10; //start game speed, gens per second
-const uint8_t speedStep = 5; //increase of game speed
+const uint8_t startSpeed = 100; //start game speed, gens per second
+const uint8_t speedStep = 50; //increase of game speed
 const bool isLoopCheck = true; //if true, game will check for end (slower)
 const bool newGameMode = false; //if true, each cell have only 4 neighbours (up, down, left and right)
 
@@ -27,7 +27,7 @@ const uint64_t fieldBorderColor = 0x000000FF; //color of field border in HEX for
 const uint8_t borderThinkness = 2; //border thinkness, set to 0, if you don't want to see borders
 
 void manual() {
-    std::cout << "Game of life - version 3.1:219\n";
+    std::cout << "Game of life - version 3.3:250\n";
     std::cout << "To pause - press 'P', Space or Enter\n";
     std::cout << "To see previous or next gen - press arror left or arror right\n";
     std::cout << "To increase game speed - press '+' or arror up\n";
@@ -151,7 +151,7 @@ void lol() {
         while (lolWindow.pollEvent(event)) if (event.type == sf::Event::Closed) lolWindow.close();
         lolWindow.clear(sf::Color(backgroundColor));
         sf::Font font;
-        font.loadFromFile("../resourses/Chava.ttf");
+        font.loadFromFile("resourses/Chava.ttf");
         sf::Text lolText;
         lolText.setFont(font);
         lolText.setCharacterSize(size);
@@ -228,7 +228,7 @@ void showGen(sf::RenderWindow& window, const std::vector<std::vector<std::vector
 
 void showText(sf::RenderWindow& window, const std::vector<std::vector<std::vector<bool>>>& field, const uint64_t& curGen, const uint64_t& repeatGen, const bool& isRepeat, const uint8_t& speed, const std::vector<uint64_t>& state, uint32_t alive) {
     sf::Font font;
-    font.loadFromFile("../resourses/Chava.ttf");
+    font.loadFromFile("resourses/Chava.ttf");
 
     sf::Text stateText, genText, speedText;
     stateText.setFont(font); genText.setFont(font); speedText.setFont(font);
@@ -280,16 +280,57 @@ void showText(sf::RenderWindow& window, const std::vector<std::vector<std::vecto
 void showMenu(sf::RenderWindow& window) {
     sf::Texture logoT;
     sf::Sprite logoS;
-    logoT.loadFromFile("../resourses/grafics/logo.png");
-    logoT.setSmooth(false);
+    logoT.loadFromFile("resourses/grafics/logo.png");
     logoS.setTexture(logoT);
-    logoS.setPosition(size * 0.25, size * 0.25);
     logoS.setScale(sf::Vector2f(size / 6, size / 6));
+    logoS.setPosition(size * 0.25, size * 0.25);
     window.draw(logoS);
     return;
 }
 
-void eventProcessing(sf::RenderWindow& window, sf::Event& event, std::vector<std::vector<std::vector<bool>>>& field, uint8_t& speed, bool& isRunning, uint64_t& curGen, uint64_t& repeatGen, bool& isRepeat, std::vector<uint64_t>& state) {
+void startScreen(sf::RenderWindow& window, const uint32_t& windowWhith, const uint32_t& windowHeight) {
+    sf::Texture logoT1, logoT2, logoT3, logoT4, logoT5;
+    sf::Sprite logoS;
+    logoT1.loadFromFile("resourses/grafics/title/s1.png");
+    logoT2.loadFromFile("resourses/grafics/title/s2.png");
+    logoT3.loadFromFile("resourses/grafics/title/s3.png");
+    logoT4.loadFromFile("resourses/grafics/title/s4.png");
+    logoT5.loadFromFile("resourses/grafics/title/s5.png");
+    window.clear(sf::Color(backgroundColor));
+    logoS.setScale(sf::Vector2f(size / 3, size / 3));
+    logoS.setPosition((windowWhith / 2) - (69 / 6 * size), (windowHeight / 2) - size / 3);
+    logoS.setTexture(logoT1, true);
+    window.draw(logoS);
+    window.display();
+    sf::sleep(sf::milliseconds(250));
+    window.clear(sf::Color(backgroundColor));
+    logoS.move(0, -size / 3);
+    logoS.setTexture(logoT2, true);
+    window.draw(logoS);
+    window.display();
+    sf::sleep(sf::milliseconds(250));
+    window.clear(sf::Color(backgroundColor));
+    logoS.move(0, -size / 3);
+    logoS.setTexture(logoT3, true);
+    window.draw(logoS);
+    window.display();
+    sf::sleep(sf::milliseconds(250));
+    window.clear(sf::Color(backgroundColor));
+    logoS.setTexture(logoT4, true);
+    window.draw(logoS);
+    window.display();
+    sf::sleep(sf::milliseconds(250));
+    window.clear(sf::Color(backgroundColor));
+    logoS.setTexture(logoT5, true);
+    window.draw(logoS);
+    window.display();
+    sf::sleep(sf::milliseconds(1000));
+    window.draw(logoS);
+    window.display();
+    return;
+}
+
+void gameEventProcessing(sf::RenderWindow& window, sf::Event& event, std::vector<std::vector<std::vector<bool>>>& field, uint8_t& speed, bool& isRunning, uint64_t& curGen, uint64_t& repeatGen, bool& isRepeat, std::vector<uint64_t>& state) {
     static bool isMouseReleased = true;
     if (event.type == sf::Event::Closed) window.close();
     else if (event.type == sf::Event::KeyPressed) {
@@ -366,51 +407,59 @@ void eventProcessing(sf::RenderWindow& window, sf::Event& event, std::vector<std
 }
 
 int main() {
-    uint8_t speed = startSpeed;
+    uint8_t speed = startSpeed, curScreen = 0;
     uint64_t curGen = 0, repeatGen = 0;
     bool isRunning = false, isRepeat = false;
-    std::vector<uint64_t> state = {1};
+    std::vector<uint64_t> states = {1};
     std::vector<std::vector<std::vector<bool>>> field;
     field.assign(1, std::vector<std::vector<bool>>(height, std::vector<bool>(whith)));
     manual();
 
-    sf::RenderWindow gameWindow(sf::VideoMode((whith * size) + (whith + 1) * borderThinkness, (height * size) + (height + 1) * borderThinkness + (size * 5.75)), "Game of life - version 3.2:219", sf::Style::Close);
+    sf::RenderWindow gameWindow(sf::VideoMode((whith * size) + (whith + 1) * borderThinkness, (height * size) + (height + 1) * borderThinkness + (size * 4.75)), "Game of life - version 3.3:250", sf::Style::Close);
     sf::Image icon;
-    icon.loadFromFile("../resourses/grafics/icon.png");
+    icon.loadFromFile("resourses/grafics/icon.png");
     gameWindow.setIcon(48, 48, icon.getPixelsPtr());
     gameWindow.setVerticalSyncEnabled(true);
 
     while (gameWindow.isOpen()) {
+        gameWindow.clear(sf::Color(backgroundColor));
         sf::Event gameEvent;
         uint32_t alive = aliveCells(field, curGen);
         field.resize(field.size() + 1, std::vector<std::vector<bool>>(height, std::vector<bool>(whith)));
-        state.resize(state.size() + 1);
+        states.resize(states.size() + 1);
        
-        while (gameWindow.pollEvent(gameEvent)) eventProcessing(gameWindow, gameEvent, field, speed, isRunning, curGen, repeatGen, isRepeat, state);
-        if (isRunning) {
-            if (!isRepeat) {
-                nextGen(field, curGen);
-                state[curGen] = check(field, curGen);
-                if (state[curGen] != 1) {
-                    isRepeat = true;
-                    repeatGen = curGen;
+        switch (curScreen) {
+        case 0:
+            startScreen(gameWindow, (whith * size) + (whith + 1) * borderThinkness, (height * size) + (height + 1) * borderThinkness + (size * 4.75));
+            curScreen = 1;
+            break;
+        case 1:
+            while (gameWindow.pollEvent(gameEvent)) gameEventProcessing(gameWindow, gameEvent, field, speed, isRunning, curGen, repeatGen, isRepeat, states);
+            if (isRunning) {
+                if (!isRepeat) {
+                    nextGen(field, curGen);
+                    states[curGen] = check(field, curGen);
+                    if (states[curGen] != 1) {
+                        isRepeat = true;
+                        repeatGen = curGen;
+                    }
+                }
+                else {
+                    if (curGen == repeatGen) {
+                        if (states[curGen] > 2) curGen = curGen - (states[repeatGen] / 2) + 1;
+                    }
+                    else ++curGen;
                 }
             }
-            else {
-                if (curGen == repeatGen) {
-                    if (state[curGen] > 2) curGen = curGen - (state[repeatGen] / 2) + 1;
-                }
-                else ++curGen;
-            }
-        }
 
-        gameWindow.clear(sf::Color(backgroundColor));
-        showMenu(gameWindow);
-        drawBorders(gameWindow);
-        showGen(gameWindow, field, curGen);
-        showText(gameWindow, field, curGen, repeatGen, isRepeat, speed, state, alive);
+            showMenu(gameWindow);
+            drawBorders(gameWindow);
+            showGen(gameWindow, field, curGen);
+            showText(gameWindow, field, curGen, repeatGen, isRepeat, speed, states, alive);
+            if (isRunning && speed != 0) sf::sleep(sf::milliseconds(10000 / speed));
+            break;
+        }
         gameWindow.display();
-        if (isRunning && speed != 0) sf::sleep(sf::milliseconds(1000 / speed));
     }
     std::cout << "Goodbye!";
     return 0;
